@@ -65,15 +65,15 @@ class ModelTraining:
             smtp_server.login(from_email, api)
             smtp_server.sendmail(from_email, to_emails, msg.as_string())
             smtp_server.quit()
-            print("Email sent successfully.")
+            logger.info("Email sent successfully.")
         except Exception as e:
-            print("Failed to send email:", e)
+            logger.info("Failed to send email:", e)
 
     def on_train_start(self, trainer):
         """Callback for training start event."""
         self.start_time = datetime.now()
-        print(f"Training started at {self.start_time}")
-        print("-" * 50)
+        logger.info(f"Training started at {self.start_time}")
+        logger.info("-" * 50)
 
     def on_train_epoch_end(self, trainer):
         """Callback for end of each training epoch."""
@@ -82,8 +82,8 @@ class ModelTraining:
         progress = (curr_epoch / total_epochs) * 100
         current_epoch = f"Epoch {curr_epoch}/{total_epochs}"
 
-        print(f"Epoch {curr_epoch}/{total_epochs} completed")
-        print("*" * 50)
+        logger.info(f"Epoch {curr_epoch}/{total_epochs} completed")
+        logger.info("*" * 50)
 
         run_async_task(
             r.publish(
@@ -135,11 +135,11 @@ class ModelTraining:
             </body>
         </html>
         """
-        print("Training completed.")
-        print(f"time taken: {time_taken_str}")
-        print(f"Total epochs trained: {trainer_epoch + 1}")
-        print(f"Metrics: {trainer_metrics}")
-        print("*" * 50)
+        logger.info("Training completed.")
+        logger.info(f"time taken: {time_taken_str}")
+        logger.info(f"Total epochs trained: {trainer_epoch + 1}")
+        logger.info(f"Metrics: {trainer_metrics}")
+        logger.info("*" * 50)
         self.send_email(body)
 
         # dump using json and publish
@@ -165,7 +165,7 @@ class ModelTraining:
         model.add_callback("on_train_epoch_end", self.on_train_epoch_end)
         model.add_callback("on_train_end", self.on_train_end)
 
-        print("Starting training...")
+        logger.info("Starting training...")
 
         # Train the model
         model.train(
@@ -187,4 +187,4 @@ class ModelTraining:
             device=self.device,
         )
 
-        print("Training completed.")
+        logger.info("Training completed.")
