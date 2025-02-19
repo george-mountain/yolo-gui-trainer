@@ -3,6 +3,7 @@
 
 ## **Overview**
 This simple project demonstrates how to train and fine-tune a computer vision model using a **GUI-based approach** instead of the command line. The application is built with **FastAPI (backend), ReactJS (frontend), and Redis (real-time progress tracking)**. The primary goal is to educate and provide a simple **user-friendly** way to train object detection models like **YOLOv8**, making it accessible to users with little or no technical knowledge.
+![YOLO GUI Trainier](https://github.com/user-attachments/assets/a75ec6b4-1d1f-4469-91a1-1a12f04227a1)
 
 With this project, users can:
 
