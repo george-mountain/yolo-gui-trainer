@@ -1,0 +1,78 @@
+services:
+  backend:
+    container_name: model-training-backend
+    image: model-training-backend
+    build:
+      context: ./backend
+    shm_size: "2gb"
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    ports:
+      - "8082:8000"
+    env_file:
+      - .env
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - ./dataset:/dataset
+    ipc: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [ gpu ]
+    networks:
+      - model-training-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: model-training-frontend
+    image: model-training-frontend
+    command: "npm run dev -- --host"
+    ports:
+      - "3000:5173"
+    env_file:
+      - .env
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+      - ./frontend/services:/app/services
+      - ./frontend/vite.config.js:/app/vite.config.js
+      - ./frontend/.eslintrc.cjs:/app/.eslintrc.cjs
+      - ./frontend/dist:/app/dist 
+    networks:
+      - model-training-network
+    restart: always
+
+  redis:
+    image: redis:latest
+    container_name: model-training-redis
+    ports:
+      - "6379:6379"
+    env_file:
+      - .env
+    restart: always
+    volumes:
+      - model_training_redis_data:/data
+    environment:
+      - REDIS_DATABASES=${REDIS_DATABASES:-0}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - model-training-network
+  
+
+networks:
+  model-training-network:
+    driver: bridge
+
+volumes:
+  model_training_redis_data:
